@@ -168,6 +168,7 @@ let partner = null, pInfo = null, myLL = null, myAcc = 0, myTrip = null, lastSen
 let myPts = [], pPts = [], pRef = null, tRef = null, retryT = null, watchRef = null, watchTo = null, busy = false;
 let fitted = false, wl = null, camStream = null, camTimer = null, scanning = false, meRef = null;
 const mq = [], waitQ = [];
+let buf = [], lastFlush = 0, lastRaw = null, flushing = false;
 
 const map = L.map("map").setView([-6.2, 106.8], 13);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19, attribution: "© OpenStreetMap"}).addTo(map);
@@ -192,7 +193,37 @@ const sisa = end => { const ms = Math.max(0, end - Date.now()), h = Math.floor(m
 const ago = t => { const d = Math.round((Date.now() - t) / 1000); return d < 60 ? d + " detik lalu" : Math.round(d / 60) + " menit lalu"; };
 const isTripP = () => !!(partner && pInfo && pInfo.trip && pInfo.trip.end > Date.now());
 const show = (l, on) => { if (on && !map.hasLayer(l)) l.addTo(map); if (!on && map.hasLayer(l)) map.removeLayer(l); };
-const ptsOf = h => (Array.isArray(h.pts) ? h.pts : Object.values(h.pts || {})).map(p => [p.a, p.o]);
+const ptsOf = h => h.f ? unflat(h.f) : (Array.isArray(h.pts) ? h.pts : Object.values(h.pts || {})).map(p => [p.a, p.o]);
+const unflat = f => { const o = []; for (let i = 0; i + 1 < f.length; i += 2) o.push([f[i], f[i + 1]]); return o; };
+async function snapRoute(pts) {
+  const fallback = pts.map(p => [p[0], p[1]]);
+  if (pts.length < 2) return fallback;
+  const coords = pts.map(p => (+p[1]).toFixed(6) + "," + (+p[0]).toFixed(6)).join(";");
+  const radii = pts.map(p => Math.min(50, Math.max(5, Math.round(p[2] || 20)))).join(";");
+  const url = "https://router.project-osrm.org/match/v1/driving/" + coords + "?overview=full&geometries=geojson&radiuses=" + radii;
+  const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const j = await (await fetch(url, {signal: ctrl.signal})).json();
+    if (j.code === "Ok" && j.matchings && j.matchings.length) {
+      const out = [];
+      j.matchings.forEach(m => m.geometry.coordinates.forEach(c => out.push([c[1], c[0]])));
+      if (out.length >= 2) return out;
+    }
+  } catch (e) {} finally { clearTimeout(timer); }
+  return fallback;
+}
+async function flushTrail() {
+  if (flushing || !me || !buf.length) return;
+  flushing = true;
+  try {
+    const batch = (lastRaw ? [lastRaw] : []).concat(buf.splice(0));
+    lastRaw = batch[batch.length - 1];
+    lastFlush = Date.now();
+    const route = await snapRoute(batch);
+    await db.ref("trails/" + me).push({f: route.flat().map(v => +v.toFixed(6))});
+  } catch (e) { fail(e); }
+  flushing = false;
+}
 window.addEventListener("unhandledrejection", e => fail(e.reason));
 
 // ---------- popup ----------
@@ -249,7 +280,7 @@ auth.onAuthStateChanged(async u => {
     db.ref("requests/" + me).on("child_added", onReq);
     db.ref("requests/" + me).on("child_changed", onReq);
     meRef = db.ref("trails/" + me);
-    meRef.on("child_added", s => { const p = s.val(); if (p) myPts.push([p.a, p.o]); });
+    meRef.on("child_added", s => { const f = s.val() && s.val().f; if (f) myPts.push(...unflat(f)); });
     meRef.on("child_removed", () => { myPts = []; });
     if (navigator.geolocation) navigator.geolocation.watchPosition(
       p => onPos(p.coords),
@@ -258,7 +289,10 @@ auth.onAuthStateChanged(async u => {
     else toast("Browser ini tidak mendukung lokasi");
   } catch (e) { fail(e); }
 });
-setInterval(() => { if (myTrip && Date.now() >= myTrip.end) finishTrip(myTrip); else renderAll(); }, 1000);
+setInterval(() => {
+  if (myTrip && Date.now() >= myTrip.end) finishTrip(myTrip);
+  else { if (myTrip && buf.length && Date.now() - lastFlush > 10000) flushTrail(); renderAll(); }
+}, 1000);
 setInterval(() => {
   if (me && partner && myLL) db.ref("users/" + me).update({lat: myLL[0], lng: myLL[1], acc: myAcc, ts: Date.now()}).catch(() => {});
 }, 20000);
@@ -349,7 +383,7 @@ function attachPartner(pid) {
     renderAll();
   }, bad);
   tRef = db.ref("trails/" + pid);
-  tRef.on("child_added", s => { const p = s.val(); if (p) pPts.push([p.a, p.o]); }, bad);
+  tRef.on("child_added", s => { const f = s.val() && s.val().f; if (f) pPts.push(...unflat(f)); }, bad);
   tRef.on("child_removed", () => { pPts = []; });
 }
 
@@ -364,7 +398,8 @@ function onPos(c) {
   }
   if (myTrip && now < myTrip.end && myAcc <= 100 && (!lastPt || hav(lastPt, myLL) > 3 || now - lastPtT > 3000)) {
     lastPt = myLL; lastPtT = now;
-    db.ref("trails/" + me).push({a: c.latitude, o: c.longitude}).catch(() => {});
+    buf.push([c.latitude, c.longitude, myAcc]);
+    if (buf.length >= 40) flushTrail();
   }
   renderAll();
 }
@@ -376,7 +411,7 @@ async function startTrip(h) {
     await db.ref("trails/" + me).remove();
     await db.ref("users/" + me).update({trip: {t0: t0, end: end, dur: h}, ts: t0});
     myTrip = {t0: t0, end: end, dur: h};
-    lastPt = null; lastPtT = 0; wake();
+    lastPt = null; lastPtT = 0; buf = []; lastRaw = null; lastFlush = Date.now(); wake();
     toast("Mulai! Jejak oranye aktif " + h + " jam");
   } catch (e) { fail(e); }
   renderAll();
@@ -385,10 +420,12 @@ async function finishTrip(trip) {
   if (!me || !trip) return;
   myTrip = null; unwake();
   try {
+    while (flushing) await new Promise(r => setTimeout(r, 200));
+    await flushTrail();
     const snap = await db.ref("trails/" + me).once("value");
     const P = [];
-    snap.forEach(c => { const p = c.val(); if (p) P.push({a: p.a, o: p.o}); });
-    if (P.length >= 2) await db.ref("history/" + me).push({t0: trip.t0, t1: Date.now(), dur: trip.dur, pts: P});
+    snap.forEach(c => { const f = c.val() && c.val().f; if (f) P.push(...unflat(f)); });
+    if (P.length >= 2) await db.ref("history/" + me).push({t0: trip.t0, t1: Date.now(), dur: trip.dur, f: P.flat()});
     await db.ref("trails/" + me).remove();
     await db.ref("users/" + me).update({trip: null});
     toast(P.length >= 2 ? "Perjalanan selesai dan tersimpan di Riwayat" : "Perjalanan selesai");
