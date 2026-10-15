@@ -11,7 +11,7 @@
 <style>
 :root{--ink:#111;--pink:#ff4d8d;--blue:#2d7dff;--yel:#ffd23f;--cyan:#38d5ff;--green:#3ddc84;--paper:#fff8e7}
 *{box-sizing:border-box;margin:0;font-family:'Comic Neue',cursive;font-weight:700}
-body{min-height:100vh;color:var(--ink);background-color:var(--paper);background-image:radial-gradient(#11111422 1.6px,transparent 1.6px);background-size:16px 16px}
+body{min-height:100vh;color:var(--ink);background:var(--paper) radial-gradient(#11111422 1.6px,transparent 1.6px) 0 0/16px 16px}
 .ic{width:24px;height:24px;vertical-align:-6px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .xl{width:46px;height:46px;vertical-align:middle;stroke-width:2.3}
 header{position:sticky;top:0;z-index:40;background:var(--pink);border-bottom:4px solid var(--ink);box-shadow:0 5px 0 var(--ink);padding:12px;text-align:center}
@@ -31,17 +31,18 @@ h3{font-family:'Bangers',cursive;font-weight:400;letter-spacing:1.5px;font-size:
 .steps li::before{content:counter(s);position:absolute;left:10px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:var(--pink);color:#fff;border:3px solid var(--ink);font-family:'Bangers',cursive;font-size:22px;display:flex;align-items:center;justify-content:center}
 .credit{display:flex;gap:12px}
 .credit div{flex:1;background:var(--green);border:4px solid var(--ink);border-radius:16px;padding:10px;box-shadow:4px 4px 0 var(--ink);text-align:center}
-.credit small{font-family:'Bangers',cursive;font-size:18px;display:block;letter-spacing:1px}
+.credit small{font-family:'Bangers',cursive;font-size:18px;display:block}
 .credit b{font-family:'Bangers',cursive;font-size:30px;font-weight:400}
 label.lbl{font-family:'Bangers',cursive;font-size:22px;letter-spacing:1px;display:block;margin-bottom:4px}
 input{width:100%;padding:12px 14px;border:4px solid var(--ink);border-radius:14px;font-size:20px;background:#fff;margin:6px 0 12px;outline:none}
 button{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;margin:8px 0;border:4px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--ink);background:var(--yel);color:var(--ink);font-family:'Bangers',cursive;font-size:24px;letter-spacing:1.5px;cursor:pointer}
 button:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
-button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+button:disabled{opacity:.55;transform:none}
 button.ghost{background:var(--cyan)}
 button.red{background:var(--pink);color:#fff;text-shadow:2px 2px 0 var(--ink)}
 button.big{font-size:40px;padding:22px;background:var(--green);box-shadow:6px 6px 0 var(--ink)}
 button.big.live{background:var(--pink);color:#fff;text-shadow:2px 2px 0 var(--ink)}
+button.hi{background:#fff;color:var(--ink);font-family:'Comic Neue',cursive;font-size:17px;justify-content:flex-start;text-align:left}
 .gsel{display:flex;gap:12px}
 .gsel button{flex:1;margin:0 0 6px;flex-direction:column;padding:14px 8px;font-size:26px;color:#fff;text-shadow:2px 2px 0 var(--ink)}
 .gsel .gp{background:var(--pink)}
@@ -55,14 +56,15 @@ button.big.live{background:var(--pink);color:#fff;text-shadow:2px 2px 0 var(--in
 .status.ok{background:var(--green)}
 #map{position:relative;z-index:0;isolation:isolate;height:52vh;margin-top:4px;border:4px solid var(--ink);border-radius:20px;box-shadow:6px 6px 0 var(--ink);overflow:hidden;background:#dfe9ef}
 .leaflet-tile-pane{filter:saturate(1.3) contrast(1.06)}
+#hCanvas{width:100%;border:4px solid var(--ink);border-radius:14px;display:block;margin-bottom:6px}
 #bnav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;gap:8px;justify-content:space-around;background:var(--yel);border-top:4px solid var(--ink);box-shadow:0 -5px 0 var(--ink);padding:10px 8px calc(10px + env(safe-area-inset-bottom,0px))}
-#bnav button{flex:1;width:auto;margin:0;padding:6px 2px;flex-direction:column;gap:0;background:#fff;box-shadow:3px 3px 0 var(--ink);font-size:17px;letter-spacing:.5px}
+#bnav button{flex:1;width:auto;margin:0;padding:6px 2px;flex-direction:column;gap:0;background:#fff;box-shadow:3px 3px 0 var(--ink);font-size:17px}
 #bnav .ic{width:36px;height:36px;stroke-width:2.4;vertical-align:0}
 #bnav button.act{background:var(--cyan);transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
 .hide{display:none!important}
 #modal{display:none;position:fixed;inset:0;z-index:60;background:#11111188;align-items:center;justify-content:center;padding:22px}
 #modal.on{display:flex}
-#mBox{position:relative;width:100%;max-width:360px;background:#fff;border:5px solid var(--ink);border-radius:24px;box-shadow:10px 10px 0 var(--ink);padding:26px 22px 20px;text-align:center;animation:pop .3s cubic-bezier(.3,1.5,.6,1)}
+#mBox{width:100%;max-width:360px;background:#fff;border:5px solid var(--ink);border-radius:24px;box-shadow:10px 10px 0 var(--ink);padding:26px 22px 20px;text-align:center;animation:pop .3s cubic-bezier(.3,1.5,.6,1)}
 #mIcon{width:76px;height:76px;margin:-64px auto 6px;border-radius:50%;background:var(--yel);border:4px solid var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:4px 4px 0 var(--ink)}
 #mIcon .ic{width:40px;height:40px;stroke-width:3}
 #mTitle{font-size:38px;color:var(--pink);text-shadow:3px 3px 0 var(--ink);line-height:1.05}
@@ -81,8 +83,8 @@ button.big.live{background:var(--pink);color:#fff;text-shadow:2px 2px 0 var(--in
 <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></symbol>
 <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
 <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
-<symbol id="i-duo" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3.5"/><circle cx="16" cy="8" r="3.5"/><path d="M2 21c0-3.6 2.7-6 6-6s6 2.4 6 6M14 15.2c.9-.2 1.8-.2 2-.2 3.3 0 6 2.4 6 6"/></symbol>
 <symbol id="i-walk" viewBox="0 0 24 24"><circle cx="13" cy="4" r="2"/><path d="M9 21l2-6-2-3 3-3 3 3 3 1M11 15l-2 6M8 10l-3 3"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
 <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
 <symbol id="i-venus" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M12 14v8M9 19h6"/></symbol>
 <symbol id="i-mars" viewBox="0 0 24 24"><circle cx="10" cy="14" r="5"/><path d="M14 10l6-6M15 4h5v5"/></symbol>
@@ -92,6 +94,7 @@ button.big.live{background:var(--pink);color:#fff;text-shadow:2px 2px 0 var(--in
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
 <symbol id="i-unlink" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></symbol>
 <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol>
+<symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
 </defs></svg>
 
 <header><span>LOKASI PASANGAN</span></header>
@@ -100,11 +103,9 @@ button.big.live{background:var(--pink);color:#fff;text-shadow:2px 2px 0 var(--in
 <div class="card hero"><h1>LOKASI<br>PASANGAN</h1><span class="sticker">Versi 8.4</span></div>
 <div class="card"><h3>Cara Main</h3><ol class="steps">
 <li>Buka <b>Akun</b>, lalu pilih gender kamu. Pilihan ini terkunci 30 hari.</li>
-<li>Perangkat A tampilkan kode atau QR. Perangkat B masukkan kode A atau scan QR A.</li>
-<li>Perangkat A muncul <b>Terima Lokasi</b>. Tekan <b>Yes</b>.</li>
-<li>Perangkat B muncul <b>Diterima</b>. Nyalakan GPS di kedua HP.</li>
-<li><b>Lokasi</b> dan <b>Berdua</b> menampilkan pasangan di peta.</li>
-<li><b>Start</b>, lalu pilih 4 atau 5 jam. Jejak oranye mengikutimu sampai waktu habis.</li>
+<li>Pasangkan dengan kode atau QR. Pihak yang menerima tekan <b>Yes</b>.</li>
+<li><b>Lokasi</b> menampilkan pasangan. Marker pink = cewek, biru = cowok.</li>
+<li><b>Start</b>, lalu pilih 4 atau 5 jam. Jejak oranye mengikuti perjalanan. Saat timer habis, otomatis tersimpan di <b>Riwayat</b>.</li>
 </ol></div>
 <div class="card"><h3>Info</h3><div class="credit"><div><small>PEMBUAT</small><b>fikri</b></div><div><small>VERSI</small><b>8.4</b></div></div></div>
 </section>
@@ -120,16 +121,21 @@ button.big.live{background:var(--pink);color:#fff;text-shadow:2px 2px 0 var(--in
 </section>
 
 <section id="lokasi" class="page"><div class="card"><h3>Lokasi</h3><p id="locTxt" class="muted"></p></div><div id="map"></div></section>
-<section id="berdua" class="page"><div class="card"><h3>Lokasi Berdua</h3><p id="dTxt" class="muted"></p></div></section>
+
 <section id="start" class="page"><div class="card"><h3>Start Lokasi</h3><p id="startTxt" class="muted"></p><button id="startBtn" class="big"></button></div></section>
+
+<section id="riwayat" class="page">
+<div class="card"><h3>Riwayat</h3><div id="histList" class="muted"></div></div>
+<div class="card" id="hWrap" style="display:none"><canvas id="hCanvas" width="600" height="480"></canvas><button id="dlBtn"><svg class="ic"><use href="#i-dl"/></svg> Unduh Gambar</button></div>
+</section>
 </main>
 
 <nav id="bnav">
 <button data-p="dash"><svg class="ic"><use href="#i-home"/></svg>Beranda</button>
 <button data-p="akun"><svg class="ic"><use href="#i-user"/></svg>Akun</button>
 <button data-p="lokasi"><svg class="ic"><use href="#i-pin"/></svg>Lokasi</button>
-<button data-p="berdua" class="hide"><svg class="ic"><use href="#i-duo"/></svg>Berdua</button>
 <button data-p="start" class="hide"><svg class="ic"><use href="#i-walk"/></svg>Start</button>
+<button data-p="riwayat"><svg class="ic"><use href="#i-clock"/></svg>Riwayat</button>
 </nav>
 
 <div id="modal"><div id="mBox"><div id="mIcon"></div><h3 id="mTitle"></h3><p id="mBody" class="muted"></p><div id="mBtns"></div></div></div>
@@ -155,214 +161,38 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.database();
 const $ = s => document.querySelector(s);
 const icon = id => `<svg class="ic"><use href="#i-${id}"/></svg>`;
-const HOUR = 36e5, LOCK = 30 * 864e5, FIT = {padding: [60, 60], maxZoom: 17};
+const HOUR = 36e5, LOCK = 30 * 864e5, STALE = 60000, FIT = {padding: [60, 60], maxZoom: 17};
 
-let me = null, myName = "", myCode = "", myGender = "", myGenderAt = 0, pendingTo = null, partner = null, pInfo = null;
-let myLL = null, tracking = false, trackEnd = 0, tPts = [], lastSent = 0, lastPt = null, lastPtT = 0;
-let pRef = null, tRef = null, retryT = null, watchRef = null, watchTo = null, busy = false, fitted = false;
-let wl = null, camStream = null, camTimer = null, scanning = false;
+let me = null, myName = "", myCode = "", myGender = "", myGenderAt = 0, pendingTo = null;
+let partner = null, pInfo = null, myLL = null, myAcc = 0, myTrip = null, lastSent = 0, lastPt = null, lastPtT = 0;
+let myPts = [], pPts = [], pRef = null, tRef = null, retryT = null, watchRef = null, watchTo = null, busy = false;
+let fitted = false, wl = null, camStream = null, camTimer = null, scanning = false, meRef = null;
 const mq = [], waitQ = [];
 
 const map = L.map("map").setView([-6.2, 106.8], 13);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19, attribution: "© OpenStreetMap"}).addTo(map);
 const dot = c => L.circleMarker([0, 0], {radius: 11, color: "#111", weight: 4, fillColor: c, fillOpacity: 1});
-const mkMe = dot("#ffd23f"), mkP = dot("#9e9e9e");
-const trail = L.polyline([], {color: "#ff8c00", weight: 9, opacity: .95, lineCap: "round", lineJoin: "round"}).addTo(map);
-const link = L.polyline([], {color: "#111", weight: 4, dashArray: "10 10"});
+const ring = c => L.circle([0, 0], {radius: 10, color: c, weight: 2, fillOpacity: .15});
+const mkMe = dot("#ffd23f"), mkP = dot("#9e9e9e"), accMe = ring("#ffd23f"), accP = ring("#9e9e9e");
+const line = () => L.polyline([], {color: "#ff8c00", weight: 9, opacity: .95, lineCap: "round", lineJoin: "round"}).addTo(map);
+const trailP = line(), trailMe = line();
 
 const toast = m => { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2800); };
 const fail = e => toast("Gagal: " + ((e && e.message) || e || "error"));
-const hav = (a, b) => { const R = 6371000, t = Math.PI / 180, dA = (b[0] - a[0]) * t, dO = (b[1] - a[1]) * t; const x = Math.sin(dA / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dO / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
+const hav = (a, b) => { const R = 6371000, t = Math.PI / 180, dA = (b[0] - a[0]) * t, dO = (b[1] - a[1]) * t, x = Math.sin(dA / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dO / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
+const pathLen = P => { let d = 0; for (let i = 1; i < P.length; i++) d += hav(P[i - 1], P[i]); return d; };
 const fmtM = m => m < 1000 ? Math.round(m) + " m" : (m / 1000).toFixed(1) + " km";
 const pColor = g => g === "pink" ? "#ff4d8d" : g === "biru" ? "#2d7dff" : "#9e9e9e";
+const gLabel = g => g === "pink" ? "Cewek" : g === "biru" ? "Cowok" : "-";
 const rndCode = () => Array.from({length: 6}, () => "ABCDEFGHJKMNPQRSTUVWXYZ23456789"[Math.random() * 31 | 0]).join("");
-const isLive = () => !!(pInfo && pInfo.on && pInfo.end > Date.now() && Date.now() - (pInfo.ts || 0) < 600000);
 const locked = () => !!myGender && Date.now() < myGenderAt + LOCK;
 const fmtDate = t => new Date(t).toLocaleDateString("id-ID", {day: "numeric", month: "long", year: "numeric"});
-const sisa = () => { const ms = Math.max(0, trackEnd - Date.now()), h = Math.floor(ms / HOUR), m = Math.floor(ms % HOUR / 60000), s = Math.floor(ms % 60000 / 1000); return h + " jam " + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0"); };
-window.addEventListener("unhandledrejection", e => fail(e.reason));
-
-// ---------- popup ----------
-function modal(title, body, btns, ic) { mq.push({title, body, btns, ic}); nextModal(); }
-function nextModal() {
-  if ($("#modal").classList.contains("on") || !mq.length) return;
-  const m = mq.shift();
-  $("#mTitle").textContent = m.title;
-  $("#mBody").textContent = m.body;
-  $("#mIcon").innerHTML = m.ic ? icon(m.ic) : "";
-  const box = $("#mBtns");
-  box.textContent = "";
-  m.btns.forEach(b => {
-    const el = document.createElement("button");
-    el.textContent = b.t;
-    if (b.g) el.className = "ghost";
-    el.onclick = () => { closeModal(); if (b.f) b.f(); };
-    box.appendChild(el);
-  });
-  $("#modal").classList.add("on");
-}
-function closeModal() { $("#modal").classList.remove("on"); setTimeout(nextModal, 150); }
-
-// ---------- navigasi bawah ----------
-function go(p) {
-  if ((p === "berdua" || p === "start") && !partner) { toast("Pasangkan dulu di menu Akun"); p = "akun"; }
-  document.querySelectorAll(".page").forEach(s => s.classList.toggle("on", s.id === p));
-  document.querySelectorAll("#bnav button").forEach(b => b.classList.toggle("act", b.dataset.p === p));
-  if (p === "lokasi" || p === "berdua" || p === "start") {
-    $("#" + p).appendChild($("#map"));
-    fitted = false;
-    setTimeout(() => { map.invalidateSize(); renderAll(); }, 120);
-  }
-  window.scrollTo(0, 0);
-  renderAll();
-}
-document.querySelectorAll("#bnav button").forEach(b => b.onclick = () => go(b.dataset.p));
-
-// ---------- login & inisialisasi ----------
-auth.onAuthStateChanged(async u => {
-  if (!u) { auth.signInAnonymously().catch(fail); return; }
-  if (me) return;
-  me = u.uid;
-  try {
-    const ref = db.ref("users/" + me);
-    const v = (await ref.once("value")).val() || {};
-    const upd = {};
-    if (!v.code) upd.code = await newCode();
-    if (!v.name) upd.name = "Perangkat " + (upd.code || v.code).slice(-3);
-    if (v.tracking) {
-      if (v.trackEnd > Date.now()) { tracking = true; trackEnd = v.trackEnd; wake(); }
-      else { upd.tracking = false; upd.trackEnd = null; await db.ref("trails/" + me).remove(); }
-    }
-    if (Object.keys(upd).length) await ref.update(upd);
-    ref.on("value", onMe, () => toast("Tidak bisa baca data. Cek Firebase Rules."));
-    db.ref("requests/" + me).on("child_added", onReq);
-    db.ref("requests/" + me).on("child_changed", onReq);
-    if (navigator.geolocation) navigator.geolocation.watchPosition(
-      p => onPos(p.coords),
-      e => { if (e.code === 1) toast("Izin lokasi ditolak. Aktifkan di pengaturan browser."); },
-      {enableHighAccuracy: true, maximumAge: 0, timeout: 20000});
-    else toast("Browser ini tidak mendukung lokasi");
-  } catch (e) { fail(e); }
-});
-setInterval(() => {
-  if (tracking && Date.now() >= trackEnd) stopTracking("Waktu habis. Jejak dimatikan otomatis.");
-  else if (partner || tracking) renderAll();
-}, 1000);
-setInterval(() => {
-  if (me && partner && myLL) db.ref("users/" + me).update({lat: myLL[0], lng: myLL[1], ts: Date.now()}).catch(() => {});
-}, 20000);
-
-async function newCode() {
-  for (let i = 0; i < 20; i++) {
-    const c = rndCode();
-    const r = await db.ref("codes/" + c).transaction(cur => cur === null ? me : undefined);
-    if (r.committed) return c;
-  }
-  throw new Error("Gagal membuat kode, coba lagi");
-}
-
-function onMe(s) {
-  const v = s.val() || {};
-  myName = v.name || ""; myCode = v.code || ""; pendingTo = v.pendingTo || null;
-  myGender = v.gender || ""; myGenderAt = v.genderAt || 0;
-  if (document.activeElement !== $("#nameIn")) $("#nameIn").value = myName;
-  if (myCode && $("#myCode").textContent !== myCode) {
-    $("#myCode").textContent = myCode;
-    $("#qr").textContent = "";
-    if (window.QRCode) new QRCode($("#qr"), {teutton><span class="logo">LOKASI PASANGAN</span></header>
-<div id="veil"></div>
-<nav id="side">
-<div class="brand">MENU!</div>
-<a data-p="dash"><svg class="ic"><use href="#i-home"/></svg> Dashboard</a>
-<a data-p="akun"><svg class="ic"><use href="#i-user"/></svg> Akun</a>
-<a data-p="lokasi"><svg class="ic"><use href="#i-pin"/></svg> Lokasi</a>
-<a data-p="start" id="navStart" class="hide"><svg class="ic"><use href="#i-walk"/></svg> Start Lokasi</a>
-</nav>
-
-<main>
-<section id="dash" class="page">
-<div class="card hero"><h1>LOKASI<br>PASANGAN</h1><span class="sticker">Versi 8.4</span></div>
-<div class="card"><h3>Cara Main</h3>
-<ol class="steps">
-<li>Buka menu <b>Akun</b> dan isi nama perangkat.</li>
-<li>Perangkat A tampilkan kode atau QR-nya. Perangkat B masukkan kode A atau scan QR A.</li>
-<li>Perangkat A muncul popup <b>Terima Lokasi</b>. Tekan <b>Yes</b>.</li>
-<li>Perangkat B muncul <b>Diterima</b>. Nyalakan GPS di kedua HP.</li>
-<li>Menu <b>Start Lokasi</b> muncul. Tekan <b>Start</b> untuk membagikan jejak, <b>Finish</b> untuk berhenti.</li>
-<li>Pasangan bisa diputuskan kapan saja di menu Akun.</li>
-</ol></div>
-<div class="card"><h3>Info</h3>
-<div class="credit"><div><small>PEMBUAT</small><b>fikri</b></div><div><small>VERSI</small><b>8.4</b></div></div></div>
-</section>
-
-<section id="akun" class="page">
-<div class="card"><label class="lbl">Nama Perangkat</label><input id="nameIn" maxlength="20" placeholder="Nama kamu"><button id="saveName"><svg class="ic"><use href="#i-save"/></svg> Simpan Nama</button></div>
-<div class="card codebox"><label class="lbl">Kode Saya</label><div class="code" id="myCode">------</div><div id="qr"></div></div>
-<div class="card"><label class="lbl">Kode / QR Pasangan</label>
-<input id="codeIn" maxlength="6" placeholder="Contoh: K7Q2ME" autocapitalize="characters">
-<button id="sendBtn"><svg class="ic"><use href="#i-send"/></svg> Kirim Permintaan</button>
-<button id="scanBtn" class="ghost"><svg class="ic"><use href="#i-cam"/></svg> Scan QR</button>
-<button id="cancelBtn" class="ghost" style="display:none"><svg class="ic"><use href="#i-x"/></svg> Batalkan Permintaan</button></div>
-<div class="card"><span id="pairBadge" class="status">BELUM PAIR</span><p id="pairTxt" class="muted"></p>
-<button id="unpairBtn" class="red" style="display:none"><svg class="ic"><use href="#i-unlink"/></svg> Putuskan Pasangan</button></div>
-</section>
-
-<section id="lokasi" class="page">
-<div class="card"><p id="locTxt" class="muted"></p></div>
-<div id="map"></div>
-</section>
-
-<section id="start" class="page">
-<div class="card"><p id="startTxt" class="muted"></p><button id="startBtn" class="big"></button></div>
-<div id="startMap"></div>
-</section>
-</main>
-
-<div id="modal"><div id="mBox"><div id="mIcon"></div><h3 id="mTitle"></h3><p id="mBody" class="muted"></p><div id="mBtns"></div></div></div>
-<div id="cam"><video id="vid" playsinline muted></video><button id="camStop" class="ghost" style="margin:0;border-radius:0;border-width:0;box-shadow:none">Batal</button></div>
-<div id="toast"></div>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCCBpitNpghSTnBRURE5-o9LMM56zg2xuQ",
-  authDomain: "lokasi-pasangan-a5b0c.firebaseapp.com",
-  databaseURL: "https://lokasi-pasangan-a5b0c-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "lokasi-pasangan-a5b0c",
-  storageBucket: "lokasi-pasangan-a5b0c.firebasestorage.app",
-  messagingSenderId: "439524067483",
-  appId: "1:439524067483:web:956f970b5f00de65b45e3e"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth(), db = firebase.database();
-const $ = s => document.querySelector(s);
-const icon = id => `<svg class="ic"><use href="#i-${id}"/></svg>`;
-
-let me = null, myName = "", myCode = "", pendingTo = null, partner = null, pInfo = null;
-let myLL = null, tracking = false, tPts = [], lastSent = 0, lastPt = null, lastPtT = 0;
-let pRef = null, tRef = null, retryT = null, watchRef = null, watchTo = null, busy = false, fitted = false;
-let wl = null, camStream = null, camTimer = null, scanning = false;
-const mq = [];
-
-const mkMap = id => {
-  const m = L.map(id).setView([-6.2, 106.8], 13);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19, attribution: "© OpenStreetMap"}).addTo(m);
-  return m;
-};
-const map = mkMap("map");
-const dot = c => L.circleMarker([0, 0], {radius: 10, color: "#111", weight: 4, fillColor: c, fillOpacity: 1});
-const mkMe = dot("#38d5ff"), mkP = dot("#ff4d8d");
-const trail = L.polyline([], {color: "#ff8c00", weight: 8, opacity: .95, lineCap: "round"}).addTo(map);
-
-const toast = m => { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2800); };
-const fail = e => toast("Gagal: " + ((e && e.message) || e || "error"));
-const dist = (a, b) => Math.hypot((a[0] - b[0]) * 111000, (a[1] - b[1]) * 111000 * Math.cos(a[0] * Math.PI / 180));
-const rndCode = () => Array.from({length: 6}, () => "ABCDEFGHJKMNPQRSTUVWXYZ23456789"[Math.random() * 31 | 0]).join("");
-const isLive = () => !!(pInfo && pInfo.on && Date.now() - (pInfo.ts || 0) < 600000);
+const fmtDT = t => new Date(t).toLocaleString("id-ID", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"});
+const sisa = end => { const ms = Math.max(0, end - Date.now()), h = Math.floor(ms / HOUR), m = Math.floor(ms % HOUR / 60000), s = Math.floor(ms % 60000 / 1000); return [h, m, s].map(n => String(n).padStart(2, "0")).join(":"); };
+const ago = t => { const d = Math.round((Date.now() - t) / 1000); return d < 60 ? d + " detik lalu" : Math.round(d / 60) + " menit lalu"; };
+const isTripP = () => !!(partner && pInfo && pInfo.trip && pInfo.trip.end > Date.now());
+const show = (l, on) => { if (on && !map.hasLayer(l)) l.addTo(map); if (!on && map.hasLayer(l)) map.removeLayer(l); };
+const ptsOf = h => (Array.isArray(h.pts) ? h.pts : Object.values(h.pts || {})).map(p => [p.a, p.o]);
 window.addEventListener("unhandledrejection", e => fail(e.reason));
 
 // ---------- popup ----------
@@ -387,22 +217,20 @@ function nextModal() {
 function closeModal() { $("#modal").classList.remove("on"); setTimeout(nextModal, 150); }
 
 // ---------- navigasi ----------
-let activeMap = map;
 function go(p) {
-  if (p === "start" && !partner) p = "akun";
+  if (p === "start" && !partner) { toast("Pasangkan dulu di menu Akun"); p = "akun"; }
   document.querySelectorAll(".page").forEach(s => s.classList.toggle("on", s.id === p));
-  document.querySelectorAll("#side a").forEach(a => a.classList.toggle("on", a.dataset.p === p));
+  document.querySelectorAll("#bnav button").forEach(b => b.classList.toggle("act", b.dataset.p === p));
   if (p === "lokasi" || p === "start") {
     $("#" + p).appendChild($("#map"));
-    setTimeout(() => { map.invalidateSize(); fitted = false; renderAll(); }, 120);
+    fitted = false;
+    setTimeout(() => { map.invalidateSize(); renderAll(); }, 120);
   }
-  closeSide();
+  if (p === "riwayat") loadHistory();
+  window.scrollTo(0, 0);
   renderAll();
 }
-function closeSide() { $("#side").classList.remove("open"); $("#veil").classList.remove("on"); }
-$("#menuBtn").onclick = () => $("#veil").classList.toggle("on", $("#side").classList.toggle("open"));
-$("#veil").onclick = closeSide;
-document.querySelectorAll("#side a").forEach(a => a.onclick = () => go(a.dataset.p));
+document.querySelectorAll("#bnav button").forEach(b => b.onclick = () => go(b.dataset.p));
 
 // ---------- login & inisialisasi ----------
 auth.onAuthStateChanged(async u => {
@@ -415,20 +243,24 @@ auth.onAuthStateChanged(async u => {
     const upd = {};
     if (!v.code) upd.code = await newCode();
     if (!v.name) upd.name = "Perangkat " + (upd.code || v.code).slice(-3);
-    if (v.tracking) { upd.tracking = false; await db.ref("trails/" + me).remove(); }
     if (Object.keys(upd).length) await ref.update(upd);
+    if (v.trip && v.trip.end <= Date.now()) await finishTrip(v.trip);
     ref.on("value", onMe, () => toast("Tidak bisa baca data. Cek Firebase Rules."));
     db.ref("requests/" + me).on("child_added", onReq);
     db.ref("requests/" + me).on("child_changed", onReq);
+    meRef = db.ref("trails/" + me);
+    meRef.on("child_added", s => { const p = s.val(); if (p) myPts.push([p.a, p.o]); });
+    meRef.on("child_removed", () => { myPts = []; });
     if (navigator.geolocation) navigator.geolocation.watchPosition(
       p => onPos(p.coords),
       e => { if (e.code === 1) toast("Izin lokasi ditolak. Aktifkan di pengaturan browser."); },
-      {enableHighAccuracy: true, maximumAge: 2000, timeout: 20000});
+      {enableHighAccuracy: true, maximumAge: 0, timeout: 20000});
     else toast("Browser ini tidak mendukung lokasi");
   } catch (e) { fail(e); }
 });
+setInterval(() => { if (myTrip && Date.now() >= myTrip.end) finishTrip(myTrip); else renderAll(); }, 1000);
 setInterval(() => {
-  if (me && partner && myLL) db.ref("users/" + me).update({lat: myLL[0], lng: myLL[1], ts: Date.now()}).catch(() => {});
+  if (me && partner && myLL) db.ref("users/" + me).update({lat: myLL[0], lng: myLL[1], acc: myAcc, ts: Date.now()}).catch(() => {});
 }, 20000);
 
 async function newCode() {
@@ -442,9 +274,10 @@ async function newCode() {
 
 function onMe(s) {
   const v = s.val() || {};
-  myName = v.name || "";
-  myCode = v.code || "";
-  pendingTo = v.pendingTo || null;
+  myName = v.name || ""; myCode = v.code || ""; pendingTo = v.pendingTo || null;
+  myGender = v.gender || ""; myGenderAt = v.genderAt || 0;
+  myTrip = v.trip && v.trip.end > Date.now() ? v.trip : null;
+  if (myTrip && !wl) wake();
   if (document.activeElement !== $("#nameIn")) $("#nameIn").value = myName;
   if (myCode && $("#myCode").textContent !== myCode) {
     $("#myCode").textContent = myCode;
@@ -453,26 +286,48 @@ function onMe(s) {
   }
   $("#cancelBtn").style.display = pendingTo ? "" : "none";
   if (pendingTo) watchReq(pendingTo);
+  if (myGender && waitQ.length) waitQ.splice(0).forEach(([f, r]) => handleReq(f, r));
   setPartner(v.partner || null);
+  updateGender();
   renderAll();
 }
+
+// ---------- gender ----------
+function updateGender() {
+  const lk = locked();
+  $("#gPink").classList.toggle("sel", myGender === "pink");
+  $("#gBlue").classList.toggle("sel", myGender === "biru");
+  $("#gPink").disabled = $("#gBlue").disabled = lk;
+  $("#gTxt").textContent = !myGender ? "Pilih gender kamu. Setelah disimpan, pilihan terkunci 30 hari."
+    : lk ? "Terkunci sampai " + fmtDate(myGenderAt + LOCK) + ". Setelah itu baru bisa diganti."
+    : "Gender bisa diganti sekarang. Setelah diganti, pilihan baru terkunci 30 hari.";
+}
+async function setGender(g) {
+  if (!me) return toast("Sedang menyiapkan, coba lagi");
+  if (locked()) return toast("Gender terkunci sampai " + fmtDate(myGenderAt + LOCK));
+  if (myGender === g) return;
+  const label = g === "pink" ? "Cewek" : "Cowok";
+  if (!confirm("Simpan gender " + label + "? Setelah disimpan, gender terkunci selama 30 hari.")) return;
+  try {
+    await db.ref("users/" + me).update({gender: g, genderAt: firebase.database.ServerValue.TIMESTAMP});
+    toast("Gender " + label + " tersimpan");
+  } catch (e) { fail(e); }
+}
+$("#gPink").onclick = () => setGender("pink");
+$("#gBlue").onclick = () => setGender("biru");
 
 // ---------- pasangan ----------
 function setPartner(pid) {
   if (pid === partner) return;
-  partner = pid; pInfo = null; tPts = []; fitted = false;
+  partner = pid; pInfo = null; pPts = [];
   if (pRef) pRef.off();
   if (tRef) tRef.off();
   pRef = tRef = null;
   clearTimeout(retryT); retryT = null;
   if (pid) attachPartner(pid);
-  else {
-    if (tracking) { tracking = false; unwake(); }
-    if ($("#start").classList.contains("on")) go("akun");
-  }
+  else if ($("#start").classList.contains("on")) go("akun");
   renderAll();
 }
-
 function attachPartner(pid) {
   const bad = () => {
     pInfo = null; renderAll();
@@ -482,6 +337,7 @@ function attachPartner(pid) {
       if (partner !== pid) return;
       if (pRef) pRef.off();
       if (tRef) tRef.off();
+      pPts = [];
       attachPartner(pid);
     }, 5000);
   };
@@ -489,50 +345,81 @@ function attachPartner(pid) {
   pRef.on("value", s => {
     const v = s.val();
     if (!v) return;
-    pInfo = {name: v.name || "Pasangan", lat: v.lat, lng: v.lng, ts: v.ts, on: !!v.tracking};
+    pInfo = {name: v.name || "Pasangan", g: v.gender || "", lat: v.lat, lng: v.lng, acc: v.acc, ts: v.ts, trip: v.trip || null};
     renderAll();
   }, bad);
   tRef = db.ref("trails/" + pid);
-  tRef.on("value", s => {
-    tPts = [];
-    s.forEach(c => { const p = c.val(); if (p) tPts.push([p.lat, p.lng]); });
-    renderAll();
-  }, bad);
+  tRef.on("child_added", s => { const p = s.val(); if (p) pPts.push([p.a, p.o]); }, bad);
+  tRef.on("child_removed", () => { pPts = []; });
 }
 
+// ---------- lokasi ----------
 function onPos(c) {
   myLL = [c.latitude, c.longitude];
+  myAcc = Math.round(c.accuracy || 0);
   const now = Date.now();
-  if (partner && now - lastSent > 3000) {
+  if (partner && now - lastSent > 1000) {
     lastSent = now;
-    db.ref("users/" + me).update({lat: c.latitude, lng: c.longitude, ts: now}).catch(() => {});
+    db.ref("users/" + me).update({lat: c.latitude, lng: c.longitude, acc: myAcc, ts: now}).catch(() => {});
   }
-  if (tracking && (!lastPt || dist(lastPt, myLL) > 8 || now - lastPtT > 5000)) {
+  if (myTrip && now < myTrip.end && myAcc <= 100 && (!lastPt || hav(lastPt, myLL) > 3 || now - lastPtT > 3000)) {
     lastPt = myLL; lastPtT = now;
-    db.ref("trails/" + me).push({lat: c.latitude, lng: c.longitude}).catch(() => {});
+    db.ref("trails/" + me).push({a: c.latitude, o: c.longitude}).catch(() => {});
   }
   renderAll();
 }
 
-// ---------- permintaan ----------
-async function onReq(s) {
-  const v = s.val(), from = s.key;
-  if (!v || !me) return;
+// ---------- perjalanan ----------
+async function startTrip(h) {
+  const t0 = Date.now(), end = t0 + h * HOUR;
   try {
-    if (v.status === "pending") {
-      if (partner) return await db.ref(`requests/${me}/${from}/status`).set("rejected");
-      modal("Terima Lokasi (" + (v.name || "Perangkat") + ")?",
-        "Pasangan ingin berbagi lokasi denganmu. Kalau diterima, lokasi kalian bisa saling terlihat.",
-        [{t: "Yes", f: () => db.ref(`requests/${me}/${from}/status`).set("accepted").catch(fail)},
-         {t: "No", g: 1, f: () => db.ref(`requests/${me}/${from}/status`).set("rejected").catch(fail)}], "pin");
-    } else if (v.status === "paired") {
-      if (!partner) await db.ref("users/" + me).update({partner: from});
-      toast("Terhubung dengan " + (v.name || "pasangan"));
-      await db.ref(`requests/${me}/${from}`).remove();
-    }
+    await db.ref("trails/" + me).remove();
+    await db.ref("users/" + me).update({trip: {t0: t0, end: end, dur: h}, ts: t0});
+    myTrip = {t0: t0, end: end, dur: h};
+    lastPt = null; lastPtT = 0; wake();
+    toast("Mulai! Jejak oranye aktif " + h + " jam");
   } catch (e) { fail(e); }
+  renderAll();
+}
+async function finishTrip(trip) {
+  if (!me || !trip) return;
+  myTrip = null; unwake();
+  try {
+    const snap = await db.ref("trails/" + me).once("value");
+    const P = [];
+    snap.forEach(c => { const p = c.val(); if (p) P.push({a: p.a, o: p.o}); });
+    if (P.length >= 2) await db.ref("history/" + me).push({t0: trip.t0, t1: Date.now(), dur: trip.dur, pts: P});
+    await db.ref("trails/" + me).remove();
+    await db.ref("users/" + me).update({trip: null});
+    toast(P.length >= 2 ? "Perjalanan selesai dan tersimpan di Riwayat" : "Perjalanan selesai");
+  } catch (e) { fail(e); }
+  renderAll();
 }
 
+// ---------- permintaan (Terima Lokasi) ----------
+function onReq(s) { handleReq(s.key, s.val()); }
+function handleReq(from, v) {
+  if (!v || !me) return;
+  if (v.status === "pending") {
+    if (partner) return db.ref(`requests/${me}/${from}/status`).set("rejected").catch(fail);
+    if (!myGender) {
+      if (!waitQ.some(x => x[0] === from)) waitQ.push([from, v]);
+      return toast("Pilih gender dulu di Akun untuk menerima permintaan");
+    }
+    modal("Terima Lokasi (" + (v.name || "Perangkat") + ")?",
+      "Pasangan ingin berbagi lokasi denganmu. Kalau diterima, lokasi kalian bisa saling terlihat.",
+      [{t: "Yes", f: () => db.ref(`requests/${me}/${from}/status`).set("accepted").catch(fail)},
+       {t: "No", g: 1, f: () => db.ref(`requests/${me}/${from}/status`).set("rejected").catch(fail)}], "pin");
+  } else if (v.status === "paired") {
+    (async () => {
+      try {
+        if (!partner) await db.ref("users/" + me).update({partner: from});
+        toast("Terhubung dengan " + (v.name || "pasangan"));
+        await db.ref(`requests/${me}/${from}`).remove();
+      } catch (e) { fail(e); }
+    })();
+  }
+}
 function watchReq(to) {
   if (watchTo === to) return;
   watchTo = to;
@@ -558,10 +445,10 @@ function watchReq(to) {
     busy = false;
   });
 }
-
 async function sendReq(raw) {
   const c = (raw || "").trim().toUpperCase();
   if (!me) return toast("Sedang menyiapkan, coba lagi");
+  if (!myGender) return toast("Pilih gender dulu di menu Akun");
   if (!c) return toast("Masukkan kode pasangan dulu");
   if (partner) return toast("Kamu sudah punya pasangan. Putuskan dulu.");
   if (pendingTo) return toast("Masih menunggu jawaban. Batalkan dulu.");
@@ -599,37 +486,24 @@ $("#unpairBtn").onclick = async () => {
   if (!me || !partner) return;
   if (!confirm("Putuskan pasangan? Lokasi kalian tidak akan terlihat lagi.")) return;
   try {
-    tracking = false; unwake();
-    await db.ref("users/" + me).update({partner: null, tracking: false, pendingTo: null});
-    await db.ref("trails/" + me).remove();
+    await db.ref("users/" + me).update({partner: null, pendingTo: null});
     toast("Pasangan diputuskan");
   } catch (e) { fail(e); }
 };
-$("#startBtn").onclick = async () => {
-  if (!me || !partner) return toast("Hubungkan pasangan dulu");
-  const b = $("#startBtn");
-  b.disabled = true;
-  try {
-    if (!tracking) {
-      await db.ref("trails/" + me).remove();
-      await db.ref("users/" + me).update({tracking: true, ts: Date.now()});
-      tracking = true; lastPt = null; lastPtT = 0; wake();
-      toast("Start! Jejakmu dibagikan");
-    } else {
-      tracking = false; unwake();
-      await db.ref("users/" + me).update({tracking: false});
-      await db.ref("trails/" + me).remove();
-      toast("Finish! Jejak dihentikan");
-    }
-  } catch (e) { fail(e); }
-  b.disabled = false;
-  renderAll();
+$("#startBtn").onclick = () => {
+  if (!me) return toast("Sedang menyiapkan, coba lagi");
+  if (!partner) return toast("Pasangkan dulu di menu Akun");
+  if (!myGender) return toast("Pilih gender dulu di menu Akun");
+  if (myTrip) return toast("Perjalanan sedang berjalan. Sisa " + sisa(myTrip.end));
+  if (!myLL) return toast("Menunggu lokasi kamu. Pastikan GPS aktif.");
+  modal("Durasi Perjalanan", "Pilih berapa lama perjalananmu. Setelah habis, jejak otomatis selesai dan tersimpan di Riwayat.",
+    [{t: "4 Jam", f: () => startTrip(4)}, {t: "5 Jam", f: () => startTrip(5)}, {t: "Batal", g: 1}], "walk");
 };
 
 // ---------- layar tetap nyala ----------
 async function wake() { try { if ("wakeLock" in navigator) wl = await navigator.wakeLock.request("screen"); } catch (e) {} }
 function unwake() { if (wl) wl.release().catch(() => {}); wl = null; }
-document.addEventListener("visibilitychange", () => { if (!document.hidden && tracking && !wl) wake(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden && myTrip && !wl) wake(); });
 
 // ---------- scan QR ----------
 $("#scanBtn").onclick = async () => {
@@ -660,35 +534,119 @@ function stopCam() {
 }
 $("#camStop").onclick = stopCam;
 
-// ---------- tampilan ----------
+// ---------- riwayat ----------
+async function loadHistory() {
+  const box = $("#histList");
+  box.textContent = "Memuat...";
+  $("#hWrap").style.display = "none";
+  const src = [["Kamu", me]];
+  if (partner) src.push([pInfo ? pInfo.name : "Pasangan", partner]);
+  const items = [];
+  for (const [name, uid] of src) {
+    try {
+      const snap = await db.ref("history/" + uid).limitToLast(30).once("value");
+      snap.forEach(c => { items.push({name: name, h: c.val()}); });
+    } catch (e) {}
+  }
+  items.sort((a, b) => (b.h.t0 || 0) - (a.h.t0 || 0));
+  box.textContent = "";
+  if (!items.length) { box.textContent = "Belum ada perjalanan tersimpan."; return; }
+  items.forEach(it => {
+    const b = document.createElement("button");
+    b.className = "hi";
+    b.textContent = it.name + " · " + fmtDT(it.h.t0) + " · " + it.h.dur + " jam · " + fmtM(pathLen(ptsOf(it.h)));
+    b.onclick = () => drawRoute(it.h, it.name);
+    box.appendChild(b);
+  });
+}
+function drawRoute(h, who) {
+  const c = $("#hCanvas"), x = c.getContext("2d"), W = c.width, H = c.height, P = ptsOf(h);
+  x.fillStyle = "#fff8e7"; x.fillRect(0, 0, W, H);
+  x.strokeStyle = "#111"; x.lineWidth = 12; x.strokeRect(6, 6, W - 12, H - 12);
+  x.fillStyle = "#111"; x.font = "40px Bangers, cursive";
+  x.fillText("PERJALANAN " + who.toUpperCase(), 28, 62);
+  if (P.length >= 2) {
+    const lats = P.map(p => p[0]), lngs = P.map(p => p[1]);
+    const minA = Math.min(...lats), maxA = Math.max(...lats), minO = Math.min(...lngs), maxO = Math.max(...lngs);
+    const k = Math.cos((minA + maxA) / 2 * Math.PI / 180), pad = 50, top = 90, bot = H - 90;
+    const sw = Math.max((maxO - minO) * k, 1e-9), sh = Math.max(maxA - minA, 1e-9);
+    const s = Math.min((W - 2 * pad) / sw, (bot - top) / sh);
+    const ox = pad + ((W - 2 * pad) - sw * s) / 2, oy = top + ((bot - top) - sh * s) / 2;
+    const X = p => ox + (p[1] - minO) * k * s, Y = p => oy + (maxA - p[0]) * s;
+    x.lineJoin = "round"; x.lineCap = "round";
+    x.beginPath();
+    P.forEach((p, i) => { if (i) x.lineTo(X(p), Y(p)); else x.moveTo(X(p), Y(p)); });
+    x.strokeStyle = "#111"; x.lineWidth = 30; x.stroke();
+    x.strokeStyle = "#ff8c00"; x.lineWidth = 18; x.stroke();
+    [[P[0], "#3ddc84", "MULAI"], [P[P.length - 1], "#ff4d8d", "SELESAI"]].forEach(([p, col, t]) => {
+      x.beginPath(); x.arc(X(p), Y(p), 16, 0, Math.PI * 2); x.fillStyle = col; x.fill();
+      x.lineWidth = 6; x.strokeStyle = "#111"; x.stroke();
+      x.fillStyle = "#111"; x.font = "28px Bangers, cursive"; x.fillText(t, X(p) + 22, Y(p) + 10);
+    });
+  }
+  x.fillStyle = "#111"; x.font = "bold 26px 'Comic Neue', sans-serif";
+  x.fillText(fmtDT(h.t0) + " · " + h.dur + " jam · " + fmtM(pathLen(P)), 28, H - 36);
+  $("#hWrap").style.display = "block";
+  $("#dlBtn").onclick = () => c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "perjalanan.png"; a.click(); });
+}
+
+// ---------- peta & tampilan ----------
+function glide(mk, to) {
+  if (!mk._ok) { mk._ok = 1; mk.setLatLng(to); return; }
+  const f = mk.getLatLng();
+  if (Math.abs(f.lat - to[0]) < 1e-7 && Math.abs(f.lng - to[1]) < 1e-7) return;
+  cancelAnimationFrame(mk._r);
+  const t0 = performance.now();
+  const step = t => {
+    const k = Math.min(1, (t - t0) / 1000);
+    mk.setLatLng([f.lat + (to[0] - f.lat) * k, f.lng + (to[1] - f.lng) * k]);
+    if (k < 1) mk._r = requestAnimationFrame(step);
+  };
+  mk._r = requestAnimationFrame(step);
+}
+function frame(pl) {
+  if (!map.getSize().x) return;
+  if (!fitted) {
+    fitted = true;
+    if (myLL) map.fitBounds(L.latLngBounds([myLL, pl]), FIT); else map.setView(pl, 16);
+    return;
+  }
+  if (!map.getBounds().contains(pl)) map.panTo(pl);
+}
 function renderAll() {
-  const live = isLive(), has = !!(pInfo && pInfo.lat != null);
-  $("#navStart").classList.toggle("hide", !partner);
+  const now = Date.now(), has = !!(pInfo && pInfo.lat != null), tp = isTripP();
+  document.querySelectorAll('#bnav [data-p="start"]').forEach(b => b.classList.toggle("hide", !partner));
   $("#unpairBtn").style.display = partner ? "" : "none";
   $("#pairBadge").textContent = !partner ? "BELUM PAIR" : pInfo ? "TERHUBUNG" : "MENUNGGU";
   $("#pairBadge").classList.toggle("ok", !!(partner && pInfo));
   $("#pairTxt").textContent = !partner ? "Belum ada pasangan. Masukkan kode pasangan atau scan QR-nya."
-    : pInfo ? "Terhubung dengan " + pInfo.name + "."
+    : pInfo ? "Terhubung dengan " + pInfo.name + " (" + gLabel(pInfo.g) + ")."
     : "Sudah terhubung, menunggu sisi pasangan. Jika lama tidak berubah, tekan Putuskan lalu coba lagi.";
-  $("#locTxt").textContent = !partner ? "Hubungkan pasangan dulu di menu Akun."
+  $("#locTxt").textContent = !myGender ? "Pilih gender dulu di menu Akun."
+    : !partner ? "Hubungkan pasangan dulu di menu Akun."
     : !has ? "Menunggu lokasi pasangan. Pastikan GPS aktif di kedua HP."
-    : pInfo.name + (pInfo.ts ? " · terakhir update " + new Date(pInfo.ts).toLocaleTimeString("id-ID", {hour: "2-digit", minute: "2-digit"}) : "");
-  $("#startBtn").innerHTML = tracking ? icon("stop") + " Finish" : icon("play") + " Start";
-  $("#startBtn").classList.toggle("stop", tracking);
-  const st = !partner ? "" : (live ? pInfo.name + " sedang Start. Jejak oranye tampil di peta." : "Pasangan belum Start.");
-  $("#startTxt").textContent = st + (tracking ? " Kamu sedang Start. Biarkan aplikasi terbuka dan layar menyala." : "");
-  if (myLL) { mkMe.setLatLng(myLL); if (!map.hasLayer(mkMe)) mkMe.addTo(map); }
-  if (partner && has) {
+    : pInfo.name + " (" + gLabel(pInfo.g) + ") · " + (pInfo.ts ? ago(pInfo.ts) : "belum ada data")
+      + (pInfo.acc ? " · akurasi ±" + pInfo.acc + " m" : "")
+      + (pInfo.ts && now - pInfo.ts > STALE ? " · LOKASI LAMA" : "")
+      + ". Marker pink = cewek, biru = cowok.";
+  $("#startBtn").innerHTML = myTrip ? icon("walk") + " " + sisa(myTrip.end) : icon("play") + " Start";
+  $("#startBtn").classList.toggle("live", !!myTrip);
+  $("#startTxt").textContent = !partner ? "Pasangkan dulu di menu Akun."
+    : myTrip ? "Kamu sedang jalan. Jejak oranye mengikutimu. Timer habis, perjalanan otomatis selesai dan tersimpan di Riwayat."
+    : tp ? pInfo.name + " sedang jalan. Sisa waktu " + sisa(pInfo.trip.end) + ". Jejak oranye mengikuti perjalanannya."
+    : "Tidak ada perjalanan. Tekan Start, lalu pilih 4 atau 5 jam.";
+  if (myLL) { glide(mkMe, myLL); accMe.setLatLng(myLL).setRadius(Math.max(myAcc, 5)); }
+  show(mkMe, !!myLL); show(accMe, !!myLL);
+  if (has) {
     const pl = [pInfo.lat, pInfo.lng];
-    mkP.setLatLng(pl);
-    if (!map.hasLayer(mkP)) mkP.addTo(map);
-    if (!fitted) {
-      fitted = true;
-      if (myLL) map.fitBounds([myLL, pl], {padding: [50, 50], maxZoom: 17});
-      else map.setView(pl, 16);
-    } else if (live && $("#start").classList.contains("on") && !map.getBounds().contains(pl)) map.panTo(pl);
-  } else mkP.remove();
-  trail.setLatLngs(live ? tPts : []);
+    mkP.setStyle({fillColor: pColor(pInfo.g)});
+    glide(mkP, pl);
+    accP.setStyle({color: pColor(pInfo.g)}).setLatLng(pl).setRadius(Math.max(pInfo.acc || 5, 5));
+  } else mkP._ok = 0;
+  show(mkP, has); show(accP, has);
+  trailP.setLatLngs(tp ? pPts : []);
+  trailMe.setLatLngs(myTrip ? myPts : []);
+  if (has && ["lokasi", "start"].some(id => $("#" + id).classList.contains("on"))) frame([pInfo.lat, pInfo.lng]);
 }
 
 go("dash");
