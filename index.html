@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ff4d8d">
+<title>Lokasi Pasangan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--ink:#111;--pink:#ff4d8d;--yel:#ffd23f;--cyan:#38d5ff;--green:#3ddc84;--paper:#fff8e7;--orange:#ff8c00}
+*{box-sizing:border-box;margin:0;font-family:'Comic Neue',cursive;font-weight:700}
+body{min-height:100vh;color:var(--ink);background-color:var(--paper);background-image:radial-gradient(#11111422 1.6px,transparent 1.6px);background-size:16px 16px}
+h1,h2,h3{font-family:'Bangers',cursive;font-weight:400;letter-spacing:1.5px}
+.ic{width:24px;height:24px;vertical-align:-6px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+header{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;background:var(--pink);border-bottom:4px solid var(--ink);box-shadow:0 5px 0 var(--ink);padding:12px 16px;color:#fff}
+header .logo{font-family:'Bangers',cursive;font-size:30px;letter-spacing:2px;text-shadow:3px 3px 0 var(--ink)}
+#menuBtn{width:auto;padding:6px;background:var(--yel);color:var(--ink);box-shadow:3px 3px 0 var(--ink);border-radius:12px;display:flex}
+#side{position:fixed;top:0;bottom:0;left:0;width:270px;z-index:50;background:var(--yel);border-right:4px solid var(--ink);box-shadow:8px 0 0 var(--ink);transform:translateX(-110%);transition:transform .25s cubic-bezier(.3,1.4,.6,1);padding-top:env(safe-area-inset-top,0px);background-image:radial-gradient(#11111422 1.6px,transparent 1.6px);background-size:14px 14px}
+#side.open{transform:none}
+#side .brand{font-family:'Bangers',cursive;font-size:34px;padding:18px 20px 10px;text-shadow:3px 3px 0 #fff;border-bottom:4px solid var(--ink)}
+#side a{display:flex;align-items:center;gap:12px;margin:12px 14px;padding:12px 14px;background:#fff;border:4px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);color:var(--ink);text-decoration:none;font-family:'Bangers',cursive;font-size:22px;letter-spacing:1px;cursor:pointer}
+#side a.on{background:var(--cyan)}
+#side a.hide{display:none}
+#veil{display:none;position:fixed;inset:0;z-index:45;background:#11111166}
+#veil.on{display:block}
+main{padding:18px;max-width:560px;margin:0 auto;position:relative;z-index:1}
+.page{display:none}
+.page.on{display:block;animation:pop .3s cubic-bezier(.3,1.5,.6,1)}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+.card{position:relative;background:#fff;border:4px solid var(--ink);border-radius:20px;box-shadow:6px 6px 0 var(--ink);padding:18px;margin-bottom:20px}
+.card h3{font-size:30px;margin-bottom:8px;color:var(--pink);text-shadow:2px 2px 0 var(--ink)}
+.hero{background:var(--cyan);text-align:center;overflow:hidden}
+.hero h1{font-size:44px;text-shadow:4px 4px 0 #fff,6px 6px 0 var(--ink);line-height:1}
+.sticker{display:inline-block;margin-top:12px;background:var(--yel);border:4px solid var(--ink);border-radius:50px;padding:4px 16px;font-family:'Bangers',cursive;font-size:22px;transform:rotate(-4deg);box-shadow:3px 3px 0 var(--ink)}
+.muted{font-size:17px;line-height:1.5;color:#333}
+.steps{list-style:none;counter-reset:s;padding:0}
+.steps li{counter-increment:s;position:relative;padding:10px 12px 10px 58px;margin-bottom:12px;background:var(--paper);border:3px solid var(--ink);border-radius:14px;font-size:18px;min-height:52px}
+.steps li::before{content:counter(s);position:absolute;left:10px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:var(--pink);color:#fff;border:3px solid var(--ink);font-family:'Bangers',cursive;font-size:22px;display:flex;align-items:center;justify-content:center}
+.credit{display:flex;gap:12px;flex-wrap:wrap}
+.credit div{flex:1;min-width:130px;background:var(--green);border:4px solid var(--ink);border-radius:16px;padding:10px;box-shadow:4px 4px 0 var(--ink);text-align:center}
+.credit small{font-family:'Bangers',cursive;font-size:18px;letter-spacing:1px;display:block}
+.credit b{font-family:'Bangers',cursive;font-size:28px;font-weight:400}
+label.lbl{font-family:'Bangers',cursive;font-size:20px;letter-spacing:1px;display:block;margin-bottom:4px}
+input{width:100%;padding:12px 14px;border:4px solid var(--ink);border-radius:14px;font-size:20px;background:#fff;box-shadow:inset 3px 3px 0 #11111122;margin:6px 0 12px;outline:none}
+input:focus{background:#fffbe6}
+button{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;margin:8px 0;border:4px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--ink);background:var(--yel);color:var(--ink);font-family:'Bangers',cursive;font-size:24px;letter-spacing:1.5px;cursor:pointer;transition:transform .06s,box-shadow .06s}
+button:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+button:disabled{opacity:.55;cursor:not-allowed}
+button.ghost{background:var(--cyan)}
+button.red{background:var(--pink);color:#fff;text-shadow:2px 2px 0 var(--ink)}
+button.big{font-size:40px;padding:22px;background:var(--green);box-shadow:6px 6px 0 var(--ink)}
+button.big.stop{background:var(--pink);color:#fff;text-shadow:2px 2px 0 var(--ink)}
+.codebox{text-align:center}
+.code{display:inline-block;font-family:'Bangers',cursive;font-size:52px;letter-spacing:10px;background:var(--yel);border:4px dashed var(--ink);border-radius:18px;padding:6px 20px;margin:6px 0;box-shadow:4px 4px 0 var(--ink)}
+#qr{display:flex;justify-content:center;margin:14px auto 0;padding:12px;background:#fff;border:4px solid var(--ink);border-radius:18px;width:max-content}
+#qr img,#qr canvas{display:block}
+.status{display:inline-block;font-family:'Bangers',cursive;font-size:20px;letter-spacing:1px;padding:4px 12px;border:3px solid var(--ink);border-radius:12px;background:var(--paper);margin-bottom:8px}
+.status.ok{background:var(--green)}
+#map{position:relative;z-index:0;isolation:isolate;height:58vh;margin-top:18px;border:4px solid var(--ink);border-radius:20px;box-shadow:6px 6px 0 var(--ink);overflow:hidden;background:#dfe9ef}
+.leaflet-tile-pane{filter:saturate(1.3) contrast(1.06)}
+#modal{display:none;position:fixed;inset:0;z-index:60;background:#11111188;align-items:center;justify-content:center;padding:22px}
+#modal.on{display:flex}
+#mBox{position:relative;width:100%;max-width:360px;background:#fff;border:5px solid var(--ink);border-radius:24px;box-shadow:10px 10px 0 var(--ink);padding:26px 22px 20px;text-align:center;animation:pop .3s cubic-bezier(.3,1.5,.6,1)}
+#mIcon{width:76px;height:76px;margin:-64px auto 6px;border-radius:50%;background:var(--yel);border:4px solid var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:4px 4px 0 var(--ink)}
+#mIcon .ic{width:40px;height:40px;stroke-width:3}
+#mTitle{font-size:38px;color:var(--pink);text-shadow:3px 3px 0 var(--ink);line-height:1.05}
+#mBody{margin:12px 0 16px;font-size:18px}
+#mBtns{display:flex;gap:12px}
+#mBtns button{flex:1;margin:0}
+#cam{display:none;position:fixed;inset:0;z-index:65;background:#111;flex-direction:column}
+#cam.on{display:flex}
+#vid{width:100%;flex:1;object-fit:cover;border-bottom:4px solid var(--ink)}
+#toast{position:fixed;left:50%;bottom:22px;z-index:70;transform:translate(-50%,160px);background:var(--ink);color:#fff;font-family:'Bangers',cursive;font-size:22px;letter-spacing:1px;padding:12px 22px;border:4px solid #fff;border-radius:16px;box-shadow:5px 5px 0 var(--pink);transition:transform .35s cubic-bezier(.3,1.5,.6,1);max-width:92%;text-align:center}
+#toast.on{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+<symbol id="i-walk" viewBox="0 0 24 24"><circle cx="13" cy="4" r="2"/><path d="M9 21l2-6-2-3 3-3 3 3 3 1M11 15l-2 6M8 10l-3 3"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v7M14 20h3"/></symbol>
+<symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></symbol>
+<symbol id="i-unlink" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></symbol>
+<symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z"/></symbol>
+<symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+</defs>
+</svg>
+
+<header><button id="menuBtn" aria-label="Menu"><svg class="ic"><use href="#i-menu"/></svg></button><span class="logo">LOKASI PASANGAN</span></header>
+<div id="veil"></div>
+<nav id="side">
+<div class="brand">MENU!</div>
+<a data-p="dash"><svg class="ic"><use href="#i-home"/></svg> Dashboard</a>
+<a data-p="akun"><svg class="ic"><use href="#i-user"/></svg> Akun</a>
+<a data-p="lokasi"><svg class="ic"><use href="#i-pin"/></svg> Lokasi</a>
+<a data-p="start" id="navStart" class="hide"><svg class="ic"><use href="#i-walk"/></svg> Start Lokasi</a>
+</nav>
+
+<main>
+<section id="dash" class="page">
+<div class="card hero"><h1>LOKASI<br>PASANGAN</h1><span class="sticker">Versi 8.4</span></div>
+<div class="card"><h3>Cara Main</h3>
+<ol class="steps">
+<li>Buka menu <b>Akun</b> dan isi nama perangkat.</li>
+<li>Perangkat A tampilkan kode atau QR-nya. Perangkat B masukkan kode A atau scan QR A.</li>
+<li>Perangkat A muncul popup <b>Terima Lokasi</b>. Tekan <b>Yes</b>.</li>
+<li>Perangkat B muncul <b>Diterima</b>. Nyalakan GPS di kedua HP.</li>
+<li>Menu <b>Start Lokasi</b> muncul. Tekan <b>Start</b> untuk membagikan jejak, <b>Finish</b> untuk berhenti.</li>
+<li>Pasangan bisa diputuskan kapan saja di menu Akun.</li>
+</ol></div>
+<div class="card"><h3>Info</h3>
+<div class="credit"><div><small>PEMBUAT</small><b>fikri</b></div><div><small>VERSI</small><b>8.4</b></div></div></div>
+</section>
+
+<section id="akun" class="page">
+<div class="card"><label class="lbl">Nama Perangkat</label><input id="nameIn" maxlength="20" placeholder="Nama kamu"><button id="saveName"><svg class="ic"><use href="#i-save"/></svg> Simpan Nama</button></div>
+<div class="card codebox"><label class="lbl">Kode Saya</label><div class="code" id="myCode">------</div><div id="qr"></div></div>
+<div class="card"><label class="lbl">Kode / QR Pasangan</label>
+<input id="codeIn" maxlength="6" placeholder="Contoh: K7Q2ME" autocapitalize="characters">
+<button id="sendBtn"><svg class="ic"><use href="#i-send"/></svg> Kirim Permintaan</button>
+<button id="scanBtn" class="ghost"><svg class="ic"><use href="#i-cam"/></svg> Scan QR</button>
+<button id="cancelBtn" class="ghost" style="display:none"><svg class="ic"><use href="#i-x"/></svg> Batalkan Permintaan</button></div>
+<div class="card"><span id="pairBadge" class="status">BELUM PAIR</span><p id="pairTxt" class="muted"></p>
+<button id="unpairBtn" class="red" style="display:none"><svg class="ic"><use href="#i-unlink"/></svg> Putuskan Pasangan</button></div>
+</section>
+
+<section id="lokasi" class="page">
+<div class="card"><p id="locTxt" class="muted"></p></div>
+<div id="map"></div>
+</section>
+
+<section id="start" class="page">
+<div class="card"><p id="startTxt" class="muted"></p><button id="startBtn" class="big"></button></div>
+<div id="startMap"></div>
+</section>
+</main>
+
+<div id="modal"><div id="mBox"><div id="mIcon"></div><h3 id="mTitle"></h3><p id="mBody" class="muted"></p><div id="mBtns"></div></div></div>
+<div id="cam"><video id="vid" playsinline muted></video><button id="camStop" class="ghost" style="margin:0;border-radius:0;border-width:0;box-shadow:none">Batal</button></div>
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCCBpitNpghSTnBRURE5-o9LMM56zg2xuQ",
+  authDomain: "lokasi-pasangan-a5b0c.firebaseapp.com",
+  databaseURL: "https://lokasi-pasangan-a5b0c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "lokasi-pasangan-a5b0c",
+  storageBucket: "lokasi-pasangan-a5b0c.firebasestorage.app",
+  messagingSenderId: "439524067483",
+  appId: "1:439524067483:web:956f970b5f00de65b45e3e"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(), db = firebase.database();
+const $ = s => document.querySelector(s);
+const icon = id => `<svg class="ic"><use href="#i-${id}"/></svg>`;
+
+let me = null, myName = "", myCode = "", pendingTo = null, partner = null, pInfo = null;
+let myLL = null, tracking = false, tPts = [], lastSent = 0, lastPt = null, lastPtT = 0;
+let pRef = null, tRef = null, retryT = null, watchRef = null, watchTo = null, busy = false, fitted = false;
+let wl = null, camStream = null, camTimer = null, scanning = false;
+const mq = [];
+
+const mkMap = id => {
+  const m = L.map(id).setView([-6.2, 106.8], 13);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19, attribution: "© OpenStreetMap"}).addTo(m);
+  return m;
+};
+const map = mkMap("map");
+const dot = c => L.circleMarker([0, 0], {radius: 10, color: "#111", weight: 4, fillColor: c, fillOpacity: 1});
+const mkMe = dot("#38d5ff"), mkP = dot("#ff4d8d");
+const trail = L.polyline([], {color: "#ff8c00", weight: 8, opacity: .95, lineCap: "round"}).addTo(map);
+
+const toast = m => { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2800); };
+const fail = e => toast("Gagal: " + ((e && e.message) || e || "error"));
+const dist = (a, b) => Math.hypot((a[0] - b[0]) * 111000, (a[1] - b[1]) * 111000 * Math.cos(a[0] * Math.PI / 180));
+const rndCode = () => Array.from({length: 6}, () => "ABCDEFGHJKMNPQRSTUVWXYZ23456789"[Math.random() * 31 | 0]).join("");
+const isLive = () => !!(pInfo && pInfo.on && Date.now() - (pInfo.ts || 0) < 600000);
+window.addEventListener("unhandledrejection", e => fail(e.reason));
+
+// ---------- popup ----------
+function modal(title, body, btns, ic) { mq.push({title, body, btns, ic}); nextModal(); }
+function nextModal() {
+  if ($("#modal").classList.contains("on") || !mq.length) return;
+  const m = mq.shift();
+  $("#mTitle").textContent = m.title;
+  $("#mBody").textContent = m.body;
+  $("#mIcon").innerHTML = m.ic ? icon(m.ic) : "";
+  const box = $("#mBtns");
+  box.textContent = "";
+  m.btns.forEach(b => {
+    const el = document.createElement("button");
+    el.textContent = b.t;
+    if (b.g) el.className = "ghost";
+    el.onclick = () => { closeModal(); if (b.f) b.f(); };
+    box.appendChild(el);
+  });
+  $("#modal").classList.add("on");
+}
+function closeModal() { $("#modal").classList.remove("on"); setTimeout(nextModal, 150); }
+
+// ---------- navigasi ----------
+let activeMap = map;
+function go(p) {
+  if (p === "start" && !partner) p = "akun";
+  document.querySelectorAll(".page").forEach(s => s.classList.toggle("on", s.id === p));
+  document.querySelectorAll("#side a").forEach(a => a.classList.toggle("on", a.dataset.p === p));
+  if (p === "lokasi" || p === "start") {
+    $("#" + p).appendChild($("#map"));
+    setTimeout(() => { map.invalidateSize(); fitted = false; renderAll(); }, 120);
+  }
+  closeSide();
+  renderAll();
+}
+function closeSide() { $("#side").classList.remove("open"); $("#veil").classList.remove("on"); }
+$("#menuBtn").onclick = () => $("#veil").classList.toggle("on", $("#side").classList.toggle("open"));
+$("#veil").onclick = closeSide;
+document.querySelectorAll("#side a").forEach(a => a.onclick = () => go(a.dataset.p));
+
+// ---------- login & inisialisasi ----------
+auth.onAuthStateChanged(async u => {
+  if (!u) { auth.signInAnonymously().catch(fail); return; }
+  if (me) return;
+  me = u.uid;
+  try {
+    const ref = db.ref("users/" + me);
+    const v = (await ref.once("value")).val() || {};
+    const upd = {};
+    if (!v.code) upd.code = await newCode();
+    if (!v.name) upd.name = "Perangkat " + (upd.code || v.code).slice(-3);
+    if (v.tracking) { upd.tracking = false; await db.ref("trails/" + me).remove(); }
+    if (Object.keys(upd).length) await ref.update(upd);
+    ref.on("value", onMe, () => toast("Tidak bisa baca data. Cek Firebase Rules."));
+    db.ref("requests/" + me).on("child_added", onReq);
+    db.ref("requests/" + me).on("child_changed", onReq);
+    if (navigator.geolocation) navigator.geolocation.watchPosition(
+      p => onPos(p.coords),
+      e => { if (e.code === 1) toast("Izin lokasi ditolak. Aktifkan di pengaturan browser."); },
+      {enableHighAccuracy: true, maximumAge: 2000, timeout: 20000});
+    else toast("Browser ini tidak mendukung lokasi");
+  } catch (e) { fail(e); }
+});
+setInterval(() => {
+  if (me && partner && myLL) db.ref("users/" + me).update({lat: myLL[0], lng: myLL[1], ts: Date.now()}).catch(() => {});
+}, 20000);
+
+async function newCode() {
+  for (let i = 0; i < 20; i++) {
+    const c = rndCode();
+    const r = await db.ref("codes/" + c).transaction(cur => cur === null ? me : undefined);
+    if (r.committed) return c;
+  }
+  throw new Error("Gagal membuat kode, coba lagi");
+}
+
+function onMe(s) {
+  const v = s.val() || {};
+  myName = v.name || "";
+  myCode = v.code || "";
+  pendingTo = v.pendingTo || null;
+  if (document.activeElement !== $("#nameIn")) $("#nameIn").value = myName;
+  if (myCode && $("#myCode").textContent !== myCode) {
+    $("#myCode").textContent = myCode;
+    $("#qr").textContent = "";
+    if (window.QRCode) new QRCode($("#qr"), {text: myCode, width: 180, height: 180, colorDark: "#111111", colorLight: "#ffffff"});
+  }
+  $("#cancelBtn").style.display = pendingTo ? "" : "none";
+  if (pendingTo) watchReq(pendingTo);
+  setPartner(v.partner || null);
+  renderAll();
+}
+
+// ---------- pasangan ----------
+function setPartner(pid) {
+  if (pid === partner) return;
+  partner = pid; pInfo = null; tPts = []; fitted = false;
+  if (pRef) pRef.off();
+  if (tRef) tRef.off();
+  pRef = tRef = null;
+  clearTimeout(retryT); retryT = null;
+  if (pid) attachPartner(pid);
+  else {
+    if (tracking) { tracking = false; unwake(); }
+    if ($("#start").classList.contains("on")) go("akun");
+  }
+  renderAll();
+}
+
+function attachPartner(pid) {
+  const bad = () => {
+    pInfo = null; renderAll();
+    if (retryT || partner !== pid) return;
+    retryT = setTimeout(() => {
+      retryT = null;
+      if (partner !== pid) return;
+      if (pRef) pRef.off();
+      if (tRef) tRef.off();
+      attachPartner(pid);
+    }, 5000);
+  };
+  pRef = db.ref("users/" + pid);
+  pRef.on("value", s => {
+    const v = s.val();
+    if (!v) return;
+    pInfo = {name: v.name || "Pasangan", lat: v.lat, lng: v.lng, ts: v.ts, on: !!v.tracking};
+    renderAll();
+  }, bad);
+  tRef = db.ref("trails/" + pid);
+  tRef.on("value", s => {
+    tPts = [];
+    s.forEach(c => { const p = c.val(); if (p) tPts.push([p.lat, p.lng]); });
+    renderAll();
+  }, bad);
+}
+
+function onPos(c) {
+  myLL = [c.latitude, c.longitude];
+  const now = Date.now();
+  if (partner && now - lastSent > 3000) {
+    lastSent = now;
+    db.ref("users/" + me).update({lat: c.latitude, lng: c.longitude, ts: now}).catch(() => {});
+  }
+  if (tracking && (!lastPt || dist(lastPt, myLL) > 8 || now - lastPtT > 5000)) {
+    lastPt = myLL; lastPtT = now;
+    db.ref("trails/" + me).push({lat: c.latitude, lng: c.longitude}).catch(() => {});
+  }
+  renderAll();
+}
+
+// ---------- permintaan ----------
+async function onReq(s) {
+  const v = s.val(), from = s.key;
+  if (!v || !me) return;
+  try {
+    if (v.status === "pending") {
+      if (partner) return await db.ref(`requests/${me}/${from}/status`).set("rejected");
+      modal("Terima Lokasi (" + (v.name || "Perangkat") + ")?",
+        "Pasangan ingin berbagi lokasi denganmu. Kalau diterima, lokasi kalian bisa saling terlihat.",
+        [{t: "Yes", f: () => db.ref(`requests/${me}/${from}/status`).set("accepted").catch(fail)},
+         {t: "No", g: 1, f: () => db.ref(`requests/${me}/${from}/status`).set("rejected").catch(fail)}], "pin");
+    } else if (v.status === "paired") {
+      if (!partner) await db.ref("users/" + me).update({partner: from});
+      toast("Terhubung dengan " + (v.name || "pasangan"));
+      await db.ref(`requests/${me}/${from}`).remove();
+    }
+  } catch (e) { fail(e); }
+}
+
+function watchReq(to) {
+  if (watchTo === to) return;
+  watchTo = to;
+  const r = db.ref(`requests/${to}/${me}`);
+  watchRef = r;
+  r.on("value", async s => {
+    const v = s.val();
+    if (busy || !v || v.status === "pending") return;
+    busy = true;
+    try {
+      if (v.status === "rejected") {
+        r.off(); watchRef = watchTo = null;
+        await db.ref("users/" + me + "/pendingTo").remove();
+        await r.remove();
+        modal("Ditolak", "Pasangan menolak permintaanmu. Coba lagi nanti ya.", [{t: "OK"}], "x");
+      } else {
+        if (v.status === "accepted") await db.ref(`requests/${to}/${me}/status`).set("paired");
+        await db.ref("users/" + me).update({partner: to, pendingTo: null});
+        r.off(); watchRef = watchTo = null;
+        if (v.status === "accepted") modal("Diterima", "Pasangan menerima permintaan lokasimu. Pastikan GPS aktif di kedua HP.", [{t: "OK"}], "check");
+      }
+    } catch (e) { fail(e); }
+    busy = false;
+  });
+}
+
+async function sendReq(raw) {
+  const c = (raw || "").trim().toUpperCase();
+  if (!me) return toast("Sedang menyiapkan, coba lagi");
+  if (!c) return toast("Masukkan kode pasangan dulu");
+  if (partner) return toast("Kamu sudah punya pasangan. Putuskan dulu.");
+  if (pendingTo) return toast("Masih menunggu jawaban. Batalkan dulu.");
+  if (c === myCode) return toast("Itu kode kamu sendiri");
+  try {
+    const to = (await db.ref("codes/" + c).once("value")).val();
+    if (!to || to === me) return toast("Kode tidak ditemukan");
+    await db.ref(`requests/${to}/${me}`).set({name: myName, status: "pending", at: Date.now()});
+    await db.ref("users/" + me).update({pendingTo: to});
+    $("#codeIn").value = "";
+    toast("Permintaan terkirim. Menunggu persetujuan...");
+  } catch (e) { fail(e); }
+}
+
+// ---------- tombol ----------
+$("#sendBtn").onclick = () => sendReq($("#codeIn").value);
+$("#cancelBtn").onclick = async () => {
+  if (!me || !pendingTo) return;
+  const to = pendingTo;
+  try {
+    if (watchRef) watchRef.off();
+    watchRef = watchTo = null;
+    await db.ref(`requests/${to}/${me}`).remove();
+    await db.ref("users/" + me + "/pendingTo").remove();
+    toast("Permintaan dibatalkan");
+  } catch (e) { fail(e); }
+};
+$("#saveName").onclick = async () => {
+  const n = $("#nameIn").value.trim().slice(0, 20);
+  if (!me) return toast("Sedang menyiapkan, coba lagi");
+  if (!n) return toast("Nama tidak boleh kosong");
+  try { await db.ref("users/" + me).update({name: n}); toast("Nama tersimpan"); } catch (e) { fail(e); }
+};
+$("#unpairBtn").onclick = async () => {
+  if (!me || !partner) return;
+  if (!confirm("Putuskan pasangan? Lokasi kalian tidak akan terlihat lagi.")) return;
+  try {
+    tracking = false; unwake();
+    await db.ref("users/" + me).update({partner: null, tracking: false, pendingTo: null});
+    await db.ref("trails/" + me).remove();
+    toast("Pasangan diputuskan");
+  } catch (e) { fail(e); }
+};
+$("#startBtn").onclick = async () => {
+  if (!me || !partner) return toast("Hubungkan pasangan dulu");
+  const b = $("#startBtn");
+  b.disabled = true;
+  try {
+    if (!tracking) {
+      await db.ref("trails/" + me).remove();
+      await db.ref("users/" + me).update({tracking: true, ts: Date.now()});
+      tracking = true; lastPt = null; lastPtT = 0; wake();
+      toast("Start! Jejakmu dibagikan");
+    } else {
+      tracking = false; unwake();
+      await db.ref("users/" + me).update({tracking: false});
+      await db.ref("trails/" + me).remove();
+      toast("Finish! Jejak dihentikan");
+    }
+  } catch (e) { fail(e); }
+  b.disabled = false;
+  renderAll();
+};
+
+// ---------- layar tetap nyala ----------
+async function wake() { try { if ("wakeLock" in navigator) wl = await navigator.wakeLock.request("screen"); } catch (e) {} }
+function unwake() { if (wl) wl.release().catch(() => {}); wl = null; }
+document.addEventListener("visibilitychange", () => { if (!document.hidden && tracking && !wl) wake(); });
+
+// ---------- scan QR ----------
+$("#scanBtn").onclick = async () => {
+  if (!("BarcodeDetector" in window)) return toast("Scan QR tidak didukung. Ketik kodenya saja.");
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}});
+    const v = $("#vid");
+    v.srcObject = camStream;
+    await v.play();
+    $("#cam").classList.add("on");
+    const det = new BarcodeDetector({formats: ["qr_code"]});
+    camTimer = setInterval(async () => {
+      if (scanning) return;
+      scanning = true;
+      try {
+        const codes = await det.detect(v);
+        if (codes.length) { const val = codes[0].rawValue; stopCam(); $("#codeIn").value = val; sendReq(val); }
+      } catch (e) {}
+      scanning = false;
+    }, 400);
+  } catch (e) { stopCam(); toast("Kamera tidak bisa dibuka: " + e.message); }
+};
+function stopCam() {
+  clearInterval(camTimer); camTimer = null; scanning = false;
+  if (camStream) camStream.getTracks().forEach(t => t.stop());
+  camStream = null;
+  $("#cam").classList.remove("on");
+}
+$("#camStop").onclick = stopCam;
+
+// ---------- tampilan ----------
+function renderAll() {
+  const live = isLive(), has = !!(pInfo && pInfo.lat != null);
+  $("#navStart").classList.toggle("hide", !partner);
+  $("#unpairBtn").style.display = partner ? "" : "none";
+  $("#pairBadge").textContent = !partner ? "BELUM PAIR" : pInfo ? "TERHUBUNG" : "MENUNGGU";
+  $("#pairBadge").classList.toggle("ok", !!(partner && pInfo));
+  $("#pairTxt").textContent = !partner ? "Belum ada pasangan. Masukkan kode pasangan atau scan QR-nya."
+    : pInfo ? "Terhubung dengan " + pInfo.name + "."
+    : "Sudah terhubung, menunggu sisi pasangan. Jika lama tidak berubah, tekan Putuskan lalu coba lagi.";
+  $("#locTxt").textContent = !partner ? "Hubungkan pasangan dulu di menu Akun."
+    : !has ? "Menunggu lokasi pasangan. Pastikan GPS aktif di kedua HP."
+    : pInfo.name + (pInfo.ts ? " · terakhir update " + new Date(pInfo.ts).toLocaleTimeString("id-ID", {hour: "2-digit", minute: "2-digit"}) : "");
+  $("#startBtn").innerHTML = tracking ? icon("stop") + " Finish" : icon("play") + " Start";
+  $("#startBtn").classList.toggle("stop", tracking);
+  const st = !partner ? "" : (live ? pInfo.name + " sedang Start. Jejak oranye tampil di peta." : "Pasangan belum Start.");
+  $("#startTxt").textContent = st + (tracking ? " Kamu sedang Start. Biarkan aplikasi terbuka dan layar menyala." : "");
+  if (myLL) { mkMe.setLatLng(myLL); if (!map.hasLayer(mkMe)) mkMe.addTo(map); }
+  if (partner && has) {
+    const pl = [pInfo.lat, pInfo.lng];
+    mkP.setLatLng(pl);
+    if (!map.hasLayer(mkP)) mkP.addTo(map);
+    if (!fitted) {
+      fitted = true;
+      if (myLL) map.fitBounds([myLL, pl], {padding: [50, 50], maxZoom: 17});
+      else map.setView(pl, 16);
+    } else if (live && $("#start").classList.contains("on") && !map.getBounds().contains(pl)) map.panTo(pl);
+  } else mkP.remove();
+  trail.setLatLngs(live ? tPts : []);
+}
+
+go("dash");
+</script>
+</body>
+</html>
