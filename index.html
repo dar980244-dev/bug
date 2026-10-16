@@ -521,6 +521,7 @@ $("#saveName").onclick = async () => {
 };
 $("#unpairBtn").onclick = async () => {
   if (!me || !partner) return;
+  if (myTrip || isTripP()) return toast("Tidak bisa diputuskan saat perjalanan berlangsung");
   if (!confirm("Putuskan pasangan? Lokasi kalian tidak akan terlihat lagi.")) return;
   try {
     await db.ref("users/" + me).update({partner: null, pendingTo: null});
@@ -531,9 +532,10 @@ $("#startBtn").onclick = () => {
   if (!me) return toast("Sedang menyiapkan, coba lagi");
   if (!partner) return toast("Pasangkan dulu di menu Akun");
   if (!myGender) return toast("Pilih gender dulu di menu Akun");
-  if (myTrip) return toast("Perjalanan sedang berjalan. Sisa " + sisa(myTrip.end));
+  if (myTrip) return toast("Perjalanan tidak bisa dihentikan. Sisa " + sisa(myTrip.end));
+  if (isTripP()) return toast(pInfo.name + " sedang jalan. Tunggu sampai timernya habis.");
   if (!myLL) return toast("Menunggu lokasi kamu. Pastikan GPS aktif.");
-  modal("Durasi Perjalanan", "Pilih berapa lama perjalananmu. Setelah habis, jejak otomatis selesai dan tersimpan di Riwayat.",
+  modal("Durasi Perjalanan", "Setelah dimulai, perjalanan tidak bisa dihentikan. Saat timer habis, otomatis selesai dan tersimpan di Riwayat.",
     [{t: "4 Jam", f: () => startTrip(4)}, {t: "5 Jam", f: () => startTrip(5)}, {t: "Batal", g: 1}], "walk");
 };
 
@@ -641,19 +643,23 @@ function glide(mk, to) {
   };
   mk._r = requestAnimationFrame(step);
 }
-function frame(pl) {
-  if (!map.getSize().x) return;
+function frame(pts) {
+  if (!map.getSize().x || !pts.length) return;
+  const b = L.latLngBounds(pts);
   if (!fitted) {
     fitted = true;
-    if (myLL) map.fitBounds(L.latLngBounds([myLL, pl]), FIT); else map.setView(pl, 16);
+    if (pts.length > 1) map.fitBounds(b, FIT); else map.setView(pts[0], 16);
     return;
   }
-  if (!map.getBounds().contains(pl)) map.panTo(pl);
+  if (map.getBounds().contains(b)) return;
+  if (pts.length > 1) map.fitBounds(b, FIT); else map.panTo(pts[0]);
 }
 function renderAll() {
-  const now = Date.now(), has = !!(pInfo && pInfo.lat != null), tp = isTripP();
+  const now = Date.now(), has = !!(pInfo && pInfo.lat != null), tp = isTripP(), anyTrip = !!myTrip || tp;
+  const showMe = !!myLL && (!anyTrip || !!myTrip), showP = has && tp;
+  const stale = tp && pInfo.ts && now - pInfo.ts > STALE;
   document.querySelectorAll('#bnav [data-p="start"]').forEach(b => b.classList.toggle("hide", !partner));
-  $("#unpairBtn").style.display = partner ? "" : "none";
+  $("#unpairBtn").style.display = partner && !anyTrip ? "" : "none";
   $("#pairBadge").textContent = !partner ? "BELUM PAIR" : pInfo ? "TERHUBUNG" : "MENUNGGU";
   $("#pairBadge").classList.toggle("ok", !!(partner && pInfo));
   $("#pairTxt").textContent = !partner ? "Belum ada pasangan. Masukkan kode pasangan atau scan QR-nya."
@@ -661,29 +667,34 @@ function renderAll() {
     : "Sudah terhubung, menunggu sisi pasangan. Jika lama tidak berubah, tekan Putuskan lalu coba lagi.";
   $("#locTxt").textContent = !myGender ? "Pilih gender dulu di menu Akun."
     : !partner ? "Hubungkan pasangan dulu di menu Akun."
-    : !has ? "Menunggu lokasi pasangan. Pastikan GPS aktif di kedua HP."
-    : pInfo.name + " (" + gLabel(pInfo.g) + ") · " + (pInfo.ts ? ago(pInfo.ts) : "belum ada data")
-      + (pInfo.acc ? " · akurasi ±" + pInfo.acc + " m" : "")
-      + (pInfo.ts && now - pInfo.ts > STALE ? " · LOKASI LAMA" : "")
-      + ". Marker pink = cewek, biru = cowok.";
+    : myTrip && tp ? "Kamu dan pasangan sama-sama sedang jalan. Kedua jejak oranye tampil di peta."
+    : myTrip ? "Kamu sedang jalan. Hanya kamu yang tampil di peta, dan jejak oranye mengikutimu."
+    : tp ? pInfo.name + " (" + gLabel(pInfo.g) + ") sedang jalan. Hanya dia yang tampil di peta, dan jejak oranye mengikutinya."
+      + (pInfo.ts ? " Update " + ago(pInfo.ts) + "." : "") + (stale ? " LOKASI LAMA." : "")
+    : "Tidak ada yang sedang jalan. Peta hanya menampilkan lokasimu sendiri" + (myAcc ? " (akurasi ±" + myAcc + " m)." : ".");
   $("#startBtn").innerHTML = myTrip ? icon("walk") + " " + sisa(myTrip.end) : icon("play") + " Start";
   $("#startBtn").classList.toggle("live", !!myTrip);
+  $("#startBtn").disabled = !myTrip && tp;
   $("#startTxt").textContent = !partner ? "Pasangkan dulu di menu Akun."
-    : myTrip ? "Kamu sedang jalan. Jejak oranye mengikutimu. Timer habis, perjalanan otomatis selesai dan tersimpan di Riwayat."
-    : tp ? pInfo.name + " sedang jalan. Sisa waktu " + sisa(pInfo.trip.end) + ". Jejak oranye mengikuti perjalanannya."
-    : "Tidak ada perjalanan. Tekan Start, lalu pilih 4 atau 5 jam.";
-  if (myLL) { glide(mkMe, myLL); accMe.setLatLng(myLL).setRadius(Math.max(myAcc, 5)); }
-  show(mkMe, !!myLL); show(accMe, !!myLL);
-  if (has) {
+    : myTrip ? "Kamu sedang jalan. Yang tampil hanya lokasimu dengan jejak oranye. Perjalanan tidak bisa dihentikan dan selesai otomatis saat timer habis."
+    : tp ? pInfo.name + " sedang jalan. Yang tampil hanya lokasinya dengan jejak oranye. Sisa waktu " + sisa(pInfo.trip.end) + "."
+    : "Tidak ada yang sedang jalan. Yang tampil lokasimu sendiri. Tekan Start, lalu pilih 4 atau 5 jam.";
+  if (showMe) { glide(mkMe, myLL); accMe.setLatLng(myLL).setRadius(Math.max(myAcc, 5)); }
+  else mkMe._ok = 0;
+  show(mkMe, showMe); show(accMe, showMe);
+  if (showP) {
     const pl = [pInfo.lat, pInfo.lng];
     mkP.setStyle({fillColor: pColor(pInfo.g)});
     glide(mkP, pl);
     accP.setStyle({color: pColor(pInfo.g)}).setLatLng(pl).setRadius(Math.max(pInfo.acc || 5, 5));
   } else mkP._ok = 0;
-  show(mkP, has); show(accP, has);
+  show(mkP, showP); show(accP, showP);
   trailP.setLatLngs(tp ? pPts : []);
   trailMe.setLatLngs(myTrip ? myPts : []);
-  if (has && ["lokasi", "start"].some(id => $("#" + id).classList.contains("on"))) frame([pInfo.lat, pInfo.lng]);
+  const pts = [];
+  if (showMe) pts.push(myLL);
+  if (showP) pts.push([pInfo.lat, pInfo.lng]);
+  if (pts.length && ["lokasi", "start"].some(id => $("#" + id).classList.contains("on"))) frame(pts);
 }
 
 go("dash");
